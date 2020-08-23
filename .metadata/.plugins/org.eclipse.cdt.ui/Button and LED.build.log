@@ -1,0 +1,28 @@
+23:41:35 **** Incremental Build of configuration Debug for project Button and LED ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\hp\Desktop\RTOS\RTOS_workspace\Button and LED\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F407VGTx -DSTM32F407G_DISC1 -DDEBUG -DSTM32F40XX -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/3rd_party/FreeRTOS/org/Source/include" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/3rd_party/FreeRTOS/org/Source/portable/GCC/ARM_CM4F" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/3rd_party/SEGGER/Config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/3rd_party/SEGGER/OS" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/3rd_party/SEGGER/SEGGER" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/StdPeriph_Driver/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/CMSIS/device" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+In file included from ../src/main.c:13:0:
+C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/CMSIS/device/stm32f4xx.h:108:0: warning: "STM32F40_41xxx" redefined
+   #define STM32F40_41xxx
+ 
+<command-line>:0:0: note: this is the location of the previous definition
+Finished building: ../src/main.c
+ 
+Building target: Button and LED.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button and LED/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Button and LED.elf" @"objects.list"   -lm
+Finished building target: Button and LED.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "Button and LED.elf" "Button and LED.bin"
+arm-none-eabi-size "Button and LED.elf"
+   text	   data	    bss	    dec	    hex	filename
+  13088	   1104	  88052	 102244	  18f64	Button and LED.elf
+ 
+
+23:41:52 Build Finished (took 17s.416ms)
+

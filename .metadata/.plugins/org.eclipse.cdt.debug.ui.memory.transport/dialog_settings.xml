@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="EXPORT_DIALOG">
+		<item value="0x20013644" key="Start"/>
+		<item value="0x20014530" key="End"/>
+		<item value="C:\Users\hp\Desktop\RTOS\RTOS_workspace\Button and LED\SEGGER Data\1.SVdat" key="File"/>
+		<item value="rawbinary" key="SELECTED_EXPORTER"/>
+		<item value="0x20013644" key="Initial address"/>
+	</section>
+</section>

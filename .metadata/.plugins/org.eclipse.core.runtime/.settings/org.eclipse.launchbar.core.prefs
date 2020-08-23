@@ -1,0 +1,10 @@
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=win32
+configDescList=org.eclipse.launchbar.core.descriptorType.default\:Hello_world Debug,org.eclipse.launchbar.core.descriptorType.default\:Button and LED Debug,org.eclipse.launchbar.core.descriptorType.default\:Button_IT Debug,org.eclipse.launchbar.core.descriptorType.default\:tasks_deletion Run,org.eclipse.launchbar.core.descriptorType.default\:Tasks_notify Debug,org.eclipse.launchbar.core.descriptorType.default\:Tasks_priority Run,org.eclipse.launchbar.core.descriptorType.default\:semapore_mutex Run
+eclipse.preferences.version=1
+org.eclipse.launchbar.core.descriptorType.default\:Button\ and\ LED\ Debug/activeLaunchMode=debug
+org.eclipse.launchbar.core.descriptorType.default\:Button\ and\ LED\ Debug/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local
+org.eclipse.launchbar.core.descriptorType.default\:Hello_world\ Debug/activeLaunchMode=debug
+org.eclipse.launchbar.core.descriptorType.default\:Hello_world\ Debug/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local
+org.eclipse.launchbar.core.descriptorType.default\:Tasks_priority\ Run/activeLaunchMode=run
+org.eclipse.launchbar.core.descriptorType.default\:tasks_deletion\ Run/activeLaunchMode=debug

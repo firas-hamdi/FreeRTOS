@@ -1,0 +1,28 @@
+23:54:47 **** Incremental Build of configuration Debug for project Hello_world ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\hp\Desktop\RTOS\RTOS_workspace\Hello_world\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F407VGTx -DSTM32F407G_DISC1 -DDEBUG -DSTM32F40XX -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/StdPeriph_Driver/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/3rd_party/SEGGER/Config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/3rd_party/SEGGER/OS" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/3rd_party/SEGGER/SEGGER" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/3rd_party/FreeRTOS/org/Source/portable/GCC/ARM_CM4F" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/3rd_party/FreeRTOS/org/Source/include" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/CMSIS/device" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+In file included from ../src/main.c:13:0:
+C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/CMSIS/device/stm32f4xx.h:108:0: warning: "STM32F40_41xxx" redefined
+   #define STM32F40_41xxx
+ 
+<command-line>:0:0: note: this is the location of the previous definition
+Finished building: ../src/main.c
+ 
+Building target: Hello_world.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=rdimon.specs -lc -lrdimon -T"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Hello_world/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Hello_world.elf" @"objects.list"   -lm
+Finished building target: Hello_world.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "Hello_world.elf" "Hello_world.bin"
+arm-none-eabi-size "Hello_world.elf"
+   text	   data	    bss	    dec	    hex	filename
+  15400	   1128	  88052	 104580	  19884	Hello_world.elf
+ 
+
+23:55:00 Build Finished (took 12s.825ms)
+

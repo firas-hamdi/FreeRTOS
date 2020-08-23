@@ -1,0 +1,85 @@
+/*
+ * Mutex_main.c
+ *
+ *  Created on: 23 août 2020
+ *      Author: hp
+ */
+#include "stm32f4xx.h"
+#include "freeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+#include <stdint.h>
+#include <stdio.h>
+
+void Task1Handler(void* params);
+void Task2Handler(void* params);
+
+TaskHandle_t Task1Handle=NULL;
+TaskHandle_t Task2Handle=NULL;
+SemaphoreHandle_t MutexHandle=NULL;
+
+int main(void)
+{
+	extern void initialise_monitor_handles();
+	initialise_monitor_handles();
+
+	printf("Welcome\n");
+	DWT->CTRL |=1;	//Recorder timestamp
+	//Activate the HSI in the default state
+	RCC_DeInit();
+	//Update the system core clock
+	SystemCoreClockUpdate();
+
+	//Start recording events
+	SEGGER_SYSVIEW_Conf();
+	SEGGER_SYSVIEW_Start();
+
+	//Create the binary semaphore
+	MutexHandle=xSemaphoreCreateMutex();
+
+	if((MutexHandle!=NULL))
+	{
+		//Create the tasks
+		xTaskCreate(Task1Handler,"Manager-Task",400,NULL,1,&Task1Handle);
+		xTaskCreate(Task2Handler,"Employee-Task",400,NULL,2,&Task2Handle);
+
+		//Start the scheduler
+		vTaskStartScheduler();
+	}
+
+	for(;;);
+}
+
+
+void Task1Handler(void* params)
+{
+	while(1)
+	{
+		xSemaphoreTake(MutexHandle,0);
+		printf("Task 1 running\n");
+		xSemaphoreGive(MutexHandle);
+	}
+}
+
+void Task2Handler(void* params)
+{
+
+	while(1)
+	{
+		xSemaphoreTake(MutexHandle,0);
+		printf("Task 2 is running\n");
+		xSemaphoreGive(MutexHandle);
+	}
+}
+
+void vApplicationIdleHook()
+{
+	//Send the processor into sleep mode to save power
+	__WFI();
+}
+
+
+
+
+
+

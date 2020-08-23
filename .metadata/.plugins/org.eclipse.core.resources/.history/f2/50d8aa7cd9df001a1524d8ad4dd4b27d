@@ -1,0 +1,41 @@
+/**
+  ******************************************************************************
+  * @file    main.c
+  * @author  Ac6
+  * @version V1.0
+  * @date    01-December-2013
+  * @brief   Default main function.
+  ******************************************************************************
+*/
+
+
+#include "stm32f4xx.h"
+#include "freeRTOS.h"
+#include "task.h"
+
+
+void buttonTaskHandler(void* params);
+void LEDTaskHandler(void* params);
+
+TaskHandle_t * ButtonTask;
+TaskHandle_t * LEDTask;
+
+int main(void)
+{
+
+	xTaskCreate(buttonTaskHandler,"Button task",configMINIMAL_STACK_SIZE,NULL,0,ButtonTask);
+	xTaskCreate(LEDTaskHandler,"LED task",configMINIMAL_STACK_SIZE,NULL,0,LEDTask);
+
+	for(;;);
+}
+
+
+void buttonTaskHandler(void* params)
+{
+	while(1);
+}
+
+void LEDTaskHandler(void* params)
+{
+	while(1);
+}

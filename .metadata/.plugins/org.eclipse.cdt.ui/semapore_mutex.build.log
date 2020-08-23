@@ -1,0 +1,36 @@
+21:06:08 **** Incremental Build of configuration Debug for project semapore_mutex ****
+make -j4 all 
+Building file: ../src/Mutex_main.c
+Invoking: MCU GCC Compiler
+C:\Users\hp\Desktop\RTOS\RTOS_workspace\semapore_mutex\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F407VGTx -DSTM32F407G_DISC1 -DDEBUG -DSTM32F40XX -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/StdPeriph_Driver/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/3rd_party/FreeRTOS/org/Source/include" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/3rd_party/FreeRTOS/org/Source/portable/GCC/ARM_CM4F" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/3rd_party/SEGGER/Config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/3rd_party/SEGGER/OS" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/3rd_party/SEGGER/SEGGER" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/CMSIS/device" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/Mutex_main.d" -MT"src/Mutex_main.o" -o "src/Mutex_main.o" "../src/Mutex_main.c"
+In file included from ../src/Mutex_main.c:7:0:
+C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/CMSIS/device/stm32f4xx.h:108:0: warning: "STM32F40_41xxx" redefined
+   #define STM32F40_41xxx
+ 
+<command-line>:0:0: note: this is the location of the previous definition
+Finished building: ../src/Mutex_main.c
+ 
+Building target: semapore_mutex.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"C:/Users/hp/Desktop/RTOS/RTOS_workspace/semapore_mutex/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "semapore_mutex.elf" @"objects.list"   -lm
+c:/ac6/systemworkbench/plugins/fr.ac6.mcu.externaltools.arm-none.win32_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc.a(lib_a-sbrkr.o): In function `_sbrk_r':
+sbrkr.c:(.text._sbrk_r+0xc): undefined reference to `_sbrk'
+c:/ac6/systemworkbench/plugins/fr.ac6.mcu.externaltools.arm-none.win32_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc.a(lib_a-writer.o): In function `_write_r':
+writer.c:(.text._write_r+0x12): undefined reference to `_write'
+c:/ac6/systemworkbench/plugins/fr.ac6.mcu.externaltools.arm-none.win32_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc.a(lib_a-closer.o): In function `_close_r':
+closer.c:(.text._close_r+0xc): undefined reference to `_close'
+c:/ac6/systemworkbench/plugins/fr.ac6.mcu.externaltools.arm-none.win32_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc.a(lib_a-lseekr.o): In function `_lseek_r':
+lseekr.c:(.text._lseek_r+0x12): undefined reference to `_lseek'
+c:/ac6/systemworkbench/plugins/fr.ac6.mcu.externaltools.arm-none.win32_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc.a(lib_a-readr.o): In function `_read_r':
+readr.c:(.text._read_r+0x12): undefined reference to `_read'
+c:/ac6/systemworkbench/plugins/fr.ac6.mcu.externaltools.arm-none.win32_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc.a(lib_a-fstatr.o): In function `_fstat_r':
+fstatr.c:(.text._fstat_r+0x10): undefined reference to `_fstat'
+c:/ac6/systemworkbench/plugins/fr.ac6.mcu.externaltools.arm-none.win32_1.17.0.201812190825/tools/compiler/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc.a(lib_a-isattyr.o): In function `_isatty_r':
+isattyr.c:(.text._isatty_r+0xc): undefined reference to `_isatty'
+collect2.exe: error: ld returned 1 exit status
+makefile:41: recipe for target 'semapore_mutex.elf' failed
+make: *** [semapore_mutex.elf] Error 1
+
+21:06:13 Build Finished (took 5s.41ms)
+

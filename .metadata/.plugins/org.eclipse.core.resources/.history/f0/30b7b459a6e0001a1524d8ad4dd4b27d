@@ -1,0 +1,123 @@
+/**
+  ******************************************************************************
+  * @file    main.c
+  * @author  Ac6
+  * @version V1.0
+  * @date    01-December-2013
+  * @brief   Default main function.
+  ******************************************************************************
+*/
+
+
+#include "stm32f4xx.h"
+#include "freeRTOS.h"
+#include "task.h"
+#include <stdint.h>
+
+#define NOT_PRESSED		0
+#define PRESSED			1
+
+void LED_taskHandler(void* params);
+void Button_taskHandler(void* params);
+void GPIO_Button_init();
+void GPIO_LED_init();
+
+void delay(uint32_t);
+
+TaskHandle_t* LedTaskHandle=NULL;
+TaskHandle_t* ButtonTaskHandle=NULL;
+
+uint8_t Button_flag=NOT_PRESSED;
+
+int main(void)
+{
+	DWT->CTRL |=1;	//Recorder timestamp
+	//Activate the HSI in the default state
+	RCC_DeInit();
+	//Update the system core clock
+	SystemCoreClockUpdate();
+
+	GPIO_LED_init();
+	GPIO_Button_init();
+
+	//Start recording
+	SEGGER_SYSVIEW_Conf();
+	SEGGER_SYSVIEW_Start();
+	//Tasks creation
+	xTaskCreate(LED_taskHandler,"LED-task",500,NULL,1,LedTaskHandle);
+	xTaskCreate(Button_taskHandler,"Button-task",500,NULL,1,ButtonTaskHandle);
+
+	//Start the scheduler
+	vTaskStartScheduler();
+	for(;;);
+}
+
+void LED_taskHandler(void* params)
+{
+	while(1)
+	{
+		//Task waiting for notification from the Button task
+		if(xTaskNotifyWait(0,0,NULL,portMAX_DELAY)==pdPASS)
+		{
+			if(Button_flag==PRESSED)
+			{
+				GPIO_WriteBit(GPIOD,GPIO_Pin_12,Bit_SET);
+			}
+			else
+			{
+				GPIO_WriteBit(GPIOD,GPIO_Pin_12,Bit_RESET);
+			}
+		}
+	}
+}
+
+void Button_taskHandler(void* params)
+{
+	while(1)
+	{
+		if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0))
+		{
+			delay(100);
+			Button_flag^=1;
+			xTaskNotify(*LedTaskHandle,0x0,eIncrement);
+		}
+	}
+}
+
+void GPIO_LED_init()
+{
+	//Enable the GPIOD peripheral
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	//GPIOD12 Init
+	GPIO_TypeDef* GPIOx=GPIOD;
+	GPIO_InitTypeDef GPIO_cfg;
+	GPIO_cfg.GPIO_Pin=GPIO_Pin_12;
+	GPIO_cfg.GPIO_Mode=GPIO_Mode_OUT;
+	GPIO_cfg.GPIO_OType=GPIO_OType_PP;
+	GPIO_cfg.GPIO_PuPd=GPIO_PuPd_NOPULL;
+	GPIO_cfg.GPIO_Speed=GPIO_Low_Speed;
+	GPIO_Init(GPIOx,&GPIO_cfg);
+}
+
+void GPIO_Button_init()
+{
+	//Enable the GPIOD peripheral
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	//GPIOD12 Init
+	GPIO_TypeDef* GPIOx=GPIOA;
+	GPIO_InitTypeDef GPIO_cfg;
+	GPIO_cfg.GPIO_Pin=GPIO_Pin_0;
+	GPIO_cfg.GPIO_Mode=GPIO_Mode_IN;
+	GPIO_cfg.GPIO_OType=GPIO_OType_PP;
+	GPIO_cfg.GPIO_PuPd=GPIO_PuPd_NOPULL;
+	GPIO_cfg.GPIO_Speed=GPIO_Low_Speed;
+	GPIO_Init(GPIOx,&GPIO_cfg);
+}
+
+void delay(uint32_t time_in_ms)
+{
+	uint32_t current_ticks= xTaskGetTickCount();
+	uint32_t time_in_ticks= (time_in_ms*configTICK_RATE_HZ)/1000;
+	while(xTaskGetTickCount()<current_ticks+time_in_ticks);
+}
+

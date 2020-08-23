@@ -1,0 +1,25 @@
+00:36:50 **** Incremental Build of configuration Debug for project task_delay ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\hp\Desktop\RTOS\RTOS_workspace\task_delay\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F407VGTx -DSTM32F407G_DISC1 -DDEBUG -DSTM32F40XX -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/3rd_party/FreeRTOS/org/Source/include" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/3rd_party/FreeRTOS/org/Source/portable/GCC/ARM_CM4F" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/3rd_party/SEGGER/Config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/3rd_party/SEGGER/OS" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/3rd_party/SEGGER/SEGGER" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/StdPeriph_Driver/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/CMSIS/device" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+In file included from ../src/main.c:13:0:
+C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/CMSIS/device/stm32f4xx.h:108:0: warning: "STM32F40_41xxx" redefined
+   #define STM32F40_41xxx
+ 
+<command-line>:0:0: note: this is the location of the previous definition
+Finished building: ../src/main.c
+ 
+Building target: task_delay.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"C:/Users/hp/Desktop/RTOS/RTOS_workspace/task_delay/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "task_delay.elf" @"objects.list"   -lm
+Finished building target: task_delay.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "task_delay.elf" "task_delay.bin"
+arm-none-eabi-size "task_delay.elf"
+   text	   data	    bss	    dec	    hex	filename
+  14424	   1104	 100340	 115868	  1c49c	task_delay.elf
+ 

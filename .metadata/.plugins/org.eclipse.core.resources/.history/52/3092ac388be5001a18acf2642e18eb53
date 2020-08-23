@@ -1,0 +1,147 @@
+/**
+  ******************************************************************************
+  * @file    main.c
+
+  * @author  Firas Hamdi
+  * @version V1.0
+  * @date    01-December-2013
+  * @brief   Disable preemptive scheduling policy and use Co-operative scheduling
+  ******************************************************************************
+*/
+
+
+#include "stm32f4xx.h"
+#include "freeRTOS.h"
+#include "task.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+#define TRUE 1
+#define AVAILABLE TRUE
+#define NOT_AVAILABLE !TRUE
+
+TaskHandle_t xTask1Handle=NULL;
+TaskHandle_t xTask2Handle=NULL;
+
+//#define SEMI_HOSTING
+void vTask1_handler(void *params);
+void vTask2_handler(void *params);
+static void hardwareInit();
+static void sendMsg(char* msg);
+
+char* msg="Hello world\n";
+uint8_t UART_ACCESS_KEY=AVAILABLE;
+
+#ifdef SEMI_HOSTING
+//ARM Semi-hosting
+extern void initialise_monitor_handles();
+#endif
+
+int main(void)
+{
+#ifdef SEMI_HOSTING
+	initialise_monitor_handles();
+#endif
+	DWT->CTRL |=1;	//Recorder timestamp
+	//Activate the HSI in the default state
+	RCC_DeInit();
+	//Update the system core clock
+	SystemCoreClockUpdate();
+
+	hardwareInit();
+
+	//Start recording events
+	SEGGER_SYSVIEW_Conf();
+	SEGGER_SYSVIEW_Start();
+	//Create two tasks
+	xTaskCreate(vTask1_handler, "Task1", configMINIMAL_STACK_SIZE, NULL, 2, & xTask1Handle);
+	xTaskCreate(vTask2_handler, "Task2", configMINIMAL_STACK_SIZE, NULL, 2, & xTask2Handle);
+
+	vTaskStartScheduler();
+	for(;;);
+}
+
+
+void vTask1_handler(void *params)
+{
+	while(1)
+	{
+		if(UART_ACCESS_KEY)
+		{
+			UART_ACCESS_KEY=NOT_AVAILABLE;
+			sendMsg(msg);
+			//Free the USART2 peripheral
+			UART_ACCESS_KEY=AVAILABLE;
+			SEGGER_SYSVIEW_Print("Task1 is yielding");
+			//Trace the scheduler in SEGGER systemView
+			traceISR_EXIT_TO_SCHEDULER();
+			//Trigger Manual context switching
+			taskYIELD();
+		}
+	}
+}
+
+void vTask2_handler(void *params)
+{
+	while(1)
+	{
+		if(UART_ACCESS_KEY)
+		{
+			UART_ACCESS_KEY=NOT_AVAILABLE;
+			sendMsg(msg);
+			//Free the USART2 peripheral
+			UART_ACCESS_KEY=AVAILABLE;
+			SEGGER_SYSVIEW_Print("Task2 is yielding");
+			//Trace the scheduler in SEGGER systemView
+			traceISR_EXIT_TO_SCHEDULER();
+			//Trigger Manual context switching
+			taskYIELD();
+		}
+	}
+}
+
+static void hardwareInit()
+{
+	//Enable USART2 peripheral clock as well as GPIOA clock
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	//USART2 initialization
+	USART_TypeDef* USARTx;
+	USART_InitTypeDef USARTcfg;
+	USARTx=USART2;
+	USARTcfg.USART_BaudRate=115200;
+	USARTcfg.USART_HardwareFlowControl=USART_HardwareFlowControl_None;
+	USARTcfg.USART_Mode= USART_Mode_Rx | USART_Mode_Tx;
+	USARTcfg.USART_Parity=USART_Parity_No;
+	USARTcfg.USART_StopBits=USART_StopBits_1;
+	USARTcfg.USART_WordLength=USART_WordLength_8b;
+	USART_Init(USARTx, &USARTcfg);
+
+	//Enable the USART2 peripheral
+	USART_Cmd(USART2,ENABLE);
+
+	//Pin configuration: PA2 ==>TX; PA3 ==>RX
+	GPIO_TypeDef* GPIOx=GPIOA;
+	GPIO_InitTypeDef GPIOcfg;
+	GPIOcfg.GPIO_Pin=GPIO_Pin_2;
+	GPIOcfg.GPIO_Mode=GPIO_Mode_AF;
+	GPIOcfg.GPIO_OType=GPIO_OType_PP;
+	GPIOcfg.GPIO_PuPd=GPIO_PuPd_UP;
+	GPIOcfg.GPIO_Speed=GPIO_Low_Speed;
+	GPIO_Init(GPIOx,&GPIOcfg);
+	GPIOcfg.GPIO_Pin=GPIO_Pin_3;
+	GPIO_Init(GPIOx,&GPIOcfg);
+	GPIO_PinAFConfig(GPIOx,GPIO_PinSource2,GPIO_AF_USART2);
+	GPIO_PinAFConfig(GPIOx,GPIO_PinSource3,GPIO_AF_USART2);
+}
+
+static void sendMsg(char* msg)
+{
+	for(uint32_t i=0;i<strlen(msg);i++)
+	{
+		while ( USART_GetFlagStatus(USART2,USART_FLAG_TXE) != SET);
+		USART_SendData(USART2,(uint16_t)(*(msg+i)));
+	}
+}

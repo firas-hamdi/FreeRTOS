@@ -1,0 +1,90 @@
+/**
+  ******************************************************************************
+  * @file    main.c
+  * @author  Ac6
+  * @version V1.0
+  * @date    01-December-2013
+  * @brief   Default main function.
+  ******************************************************************************
+*/
+
+
+#include "stm32f4xx.h"
+#include "freeRTOS.h"
+#include "task.h"
+
+
+void LED_taskHandler(void* params);
+void Button_taskHandler(void* params);
+static void USARTInit();
+
+TaskHandle_t* LedTaskHandle=NULL;
+TaskHandle_t* ButtonTaskHandle=NULL;
+
+int main(void)
+{
+	DWT->CTRL |=1;	//Recorder timestamp
+	//Activate the HSI in the default state
+	RCC_DeInit();
+	//Update the system core clock
+	SystemCoreClockUpdate();
+
+	USARTInit();
+	//Start recording
+	SEGGER_SYSVIEW_Conf();
+	SEGGER_SYSVIEW_Start();
+	//Tasks creation
+	xTaskCreate(LED_taskHandler,"LED-task",configMINIMAL_STACK_SIZE,NULL,1,LedTaskHandle);
+	xTaskCreate(Button_taskHandler,"Button-task",configMINIMAL_STACK_SIZE,NULL,1,ButtonTaskHandle);
+
+	//Start the scheduler
+	vTaskStartScheduler();
+	for(;;);
+}
+
+void LED_taskHandler(void* params)
+{
+	while(1);
+}
+
+void Button_taskHandler(void* params)
+{
+	while(1);
+}
+
+static void USARTInit()
+{
+	//Enable USART2 peripheral clock as well as GPIOA clock
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	//USART2 initialization
+	USART_TypeDef* USARTx;
+	USART_InitTypeDef USARTcfg;
+	USARTx=USART2;
+	USARTcfg.USART_BaudRate=115200;
+	USARTcfg.USART_HardwareFlowControl=USART_HardwareFlowControl_None;
+	USARTcfg.USART_Mode= USART_Mode_Rx | USART_Mode_Tx;
+	USARTcfg.USART_Parity=USART_Parity_No;
+	USARTcfg.USART_StopBits=USART_StopBits_1;
+	USARTcfg.USART_WordLength=USART_WordLength_8b;
+	USART_Init(USARTx, &USARTcfg);
+
+	//Enable the USART2 peripheral
+	USART_Cmd(USART2,ENABLE);
+
+	//Pin configuration: PA2 ==>TX; PA3 ==>RX
+	GPIO_TypeDef* GPIOx=GPIOA;
+	GPIO_InitTypeDef GPIOcfg;
+	GPIOcfg.GPIO_Pin=GPIO_Pin_2;
+	GPIOcfg.GPIO_Mode=GPIO_Mode_AF;
+	GPIOcfg.GPIO_OType=GPIO_OType_PP;
+	GPIOcfg.GPIO_PuPd=GPIO_PuPd_UP;
+	GPIOcfg.GPIO_Speed=GPIO_Low_Speed;
+	GPIO_Init(GPIOx,&GPIOcfg);
+	GPIOcfg.GPIO_Pin=GPIO_Pin_3;
+	GPIO_Init(GPIOx,&GPIOcfg);
+	GPIO_PinAFConfig(GPIOx,GPIO_PinSource2,GPIO_AF_USART2);
+	GPIO_PinAFConfig(GPIOx,GPIO_PinSource3,GPIO_AF_USART2);
+}
+

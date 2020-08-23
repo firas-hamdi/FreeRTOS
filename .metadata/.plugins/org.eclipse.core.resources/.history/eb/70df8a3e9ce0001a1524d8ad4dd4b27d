@@ -1,0 +1,51 @@
+/**
+  ******************************************************************************
+  * @file    main.c
+  * @author  Ac6
+  * @version V1.0
+  * @date    01-December-2013
+  * @brief   Default main function.
+  ******************************************************************************
+*/
+
+
+#include "stm32f4xx.h"
+#include "task.h"
+#include "freeRTOS.h"
+
+
+void LED_taskHandler(void* params);
+void Button_taskHandler(void* params);
+
+TaskHandle_t LedTaskHandle=NULL;
+TaskHandle_t ButtonTaskHandle=NULL;
+
+int main(void)
+{
+	DWT->CTRL |=1;	//Recorder timestamp
+	//Activate the HSI in the default state
+	RCC_DeInit();
+	//Update the system core clock
+	SystemCoreClockUpdate();
+
+	//Start recording
+	SEGGER_SYSVIEW_Conf();
+	SEGGER_SYSVIEW_Start();
+	//Tasks creation
+	xTaskCreate(LED_taskHandler,"LED-task",configMINIMAL_STACK_SIZE,NULL,1,&LedTaskHandle);
+	xTaskCreate(Button_taskHandler,"Button-task",configMINIMAL_STACK_SIZE,NULL,1,&ButtonTaskHandle);
+
+	//Start the scheduler
+	vTaskStartScheduler();
+	for(;;);
+}
+
+void LED_taskHandler(void* params)
+{
+	while(1);
+}
+
+void Button_taskHandler(void* params)
+{
+	while(1);
+}

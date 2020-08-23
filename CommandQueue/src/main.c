@@ -1,0 +1,328 @@
+/**
+  ******************************************************************************
+  * @file    main.c
+
+  * @author  Ac6
+  * @version V1.0
+  * @date    01-December-2013
+  * @brief   Using notification and queues for tasks synchronization and data
+  * exchange between tasks. Enabling the idle hook function to send the CPU into
+  * low power mode
+  ******************************************************************************
+*/
+
+
+#include "stm32f4xx.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include "freeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "timers.h"
+
+//Define the commands
+#define	LED_ON		1
+#define LED_OFF		2
+#define LED_TOGGLE	3
+#define LED_STATUS	4
+#define DATETIME	5
+#define EXIT		0
+
+//Command structure format
+typedef struct{
+	uint8_t command;
+	uint8_t commandArgs[10];
+}command_type_t;
+
+uint8_t commandBuffer[50];
+uint8_t commandIndex=0;
+char message[250]={0};
+
+//Queue handles
+QueueHandle_t	commandQueue=NULL;
+QueueHandle_t	uartWriteQueue=NULL;
+
+//Timer handle
+TimerHandle_t	LED_timer_handle=NULL;
+
+//Tasks handles
+TaskHandle_t	menu_print_handle=NULL;
+TaskHandle_t	cmd_handling_handle=NULL;
+TaskHandle_t	cmd_processing_handle=NULL;
+TaskHandle_t	uart_write_handle=NULL;
+
+char command_menu[]={"\
+		\r\n LED ON 				====>	1\
+		\r\n LED OFF				====>	2\
+		\r\n LED TOGGLE				====>	3\
+		\r\n LED READ STATUS		====>	4\
+		\r\n PRINT DATETIME 		====>	5\
+		\r\n EXIT APP				====>	0\
+		\r\n Input your choice here: "};
+
+//Prototype functions
+void vApplicationIdleHook();
+void menu_print_handler(void*);
+void cmd_handling_handler(void*);
+void cmd_processing_handler(void*);
+void uart_write_handler(void*);
+static void sendMsg(char*);
+static void Uart_Init();
+static void GPIO_LED_init();
+static uint8_t get_command(uint8_t*);
+static void toggle_LED(TimerHandle_t);
+
+int main(void)
+{
+	DWT->CTRL |=1;	//Recorder timestamp
+	//Activate the HSI in the default state
+	RCC_DeInit();
+	//Update the system core clock
+	SystemCoreClockUpdate();
+
+	//Start recording events
+	SEGGER_SYSVIEW_Conf();
+	SEGGER_SYSVIEW_Start();
+
+	//Hardware initialization
+	Uart_Init();
+	GPIO_LED_init();
+
+	//Queues creation
+	commandQueue=xQueueCreate(10,sizeof(command_type_t*));
+	uartWriteQueue=xQueueCreate(10,sizeof(char*));
+
+	//Check that queue creation was successfull
+	if((commandQueue!=NULL)&&(uartWriteQueue!=NULL))
+	{
+		//Tasks creation
+		xTaskCreate(menu_print_handler,"menu print task",500,NULL,1,&menu_print_handle);
+		xTaskCreate(cmd_handling_handler,"menu print task",500,NULL,2,&cmd_handling_handle);
+		xTaskCreate(cmd_processing_handler,"menu print task",500,NULL,2,&cmd_processing_handle);
+		xTaskCreate(uart_write_handler,"menu print task",500,NULL,2,&uart_write_handle);
+		//Start scheduler
+		vTaskStartScheduler();
+	}
+	else
+	{
+		sprintf(message,"Error: Queue creation failed\r\n");
+		sendMsg(message);
+	}
+	for(;;);
+}
+
+
+void menu_print_handler(void* params)
+{
+	char* pData=command_menu;
+	while(1)
+	{
+		xQueueSend(uartWriteQueue,&pData,portMAX_DELAY);
+		xTaskNotifyWait(0,0,NULL,portMAX_DELAY);
+	}
+}
+
+void cmd_handling_handler(void* params)
+{
+	uint8_t command_code=0;
+	command_type_t* command;
+	while(1)
+	{
+		xTaskNotifyWait(0,0,NULL,portMAX_DELAY);
+		//Allocate dynamically space in the heap for the command structure
+		command=(command_type_t*) pvPortMalloc(sizeof(command_type_t));
+		//commandBuffer is a global variable, so it is protected here
+		taskENTER_CRITICAL();
+		//Command received ==> send it to the command queue
+		command_code=get_command(commandBuffer);
+		command->command=command_code;
+		taskEXIT_CRITICAL();
+
+		//Send the command to the command queue
+		xQueueSend(commandQueue,&command,portMAX_DELAY);
+	}
+}
+
+void cmd_processing_handler(void* params)
+{
+	command_type_t* new_command;
+	char command_message[50];
+	RTC_TimeTypeDef RTC_time;
+	RTC_DateTypeDef RTC_date;
+	TickType_t toggle_duration=pdMS_TO_TICKS(500);
+	while(1)
+	{
+		//Read the data from the command queue
+		xQueueReceive(commandQueue,(void*)&new_command,portMAX_DELAY);
+		//decode the command
+		switch(new_command->command)
+		{
+			case	LED_ON:
+				//Turn On the LED
+				GPIO_WriteBit(GPIOD,GPIO_Pin_12,SET);
+				break;
+			case 	LED_OFF:
+				//Turn Off the LED
+				GPIO_WriteBit(GPIOD,GPIO_Pin_12,RESET);
+				break;
+			case	LED_TOGGLE:
+				//Create the software timer
+				LED_timer_handle=xTimerCreate("Software timer: LED toggle",toggle_duration,pdTRUE,NULL,toggle_LED);
+				//Start the software timer
+				xTimerStart(LED_timer_handle,portMAX_DELAY);
+				break;
+			case	LED_STATUS:
+				//Print the LED status
+				sprintf(command_message,"The status of the LED is: %d\r\n", GPIO_ReadOutputDataBit(GPIOD,GPIO_Pin_12));
+				xQueueSend(uartWriteQueue,&command_message,portMAX_DELAY);
+				break;
+			case	DATETIME:
+				//read time and date from RTC peripheral
+				RTC_GetTime(RTC_Format_BIN, &RTC_time);
+				RTC_GetDate(RTC_Format_BIN, &RTC_date);
+				sprintf(command_message,"\r\nTime: %02d:%02d:%02d \r\n Date : %02d-%2d-%2d \r\n",RTC_time.RTC_Hours,RTC_time.RTC_Minutes,RTC_time.RTC_Seconds, \
+												RTC_date.RTC_Date,RTC_date.RTC_Month,RTC_date.RTC_Year );
+				xQueueSend(uartWriteQueue,&command_message,portMAX_DELAY);
+				break;
+			case	EXIT:
+				//Delete all the tasks
+				vTaskDelete(menu_print_handle);
+				vTaskDelete(cmd_handling_handle);
+				vTaskDelete(cmd_processing_handle);
+				vTaskDelete(uart_write_handle);
+				//Disable peripheral interrupts
+				NVIC_DisableIRQ(USART2_IRQn);
+				break;
+			default:
+				sprintf(command_message,"Invalid command\r\n");
+				xQueueSend(uartWriteQueue,&command_message,portMAX_DELAY);
+				break;
+		}
+		//Free the allocated memory for the new command
+		vPortFree(new_command);
+	}
+}
+
+void uart_write_handler(void* params)
+{
+	char* pdata_to_uart=NULL;
+	while(1)
+	{
+		xQueueReceive(uartWriteQueue,&pdata_to_uart,portMAX_DELAY);
+		sendMsg(pdata_to_uart);
+	}
+}
+
+static void Uart_Init()
+{
+	//Enable USART2 peripheral clock as well as GPIOA clock
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	//USART2 initialization
+	USART_TypeDef* USARTx;
+	USART_InitTypeDef USARTcfg;
+	USARTx=USART2;
+	USARTcfg.USART_BaudRate=115200;
+	USARTcfg.USART_HardwareFlowControl=USART_HardwareFlowControl_None;
+	USARTcfg.USART_Mode= USART_Mode_Rx | USART_Mode_Tx;
+	USARTcfg.USART_Parity=USART_Parity_No;
+	USARTcfg.USART_StopBits=USART_StopBits_1;
+	USARTcfg.USART_WordLength=USART_WordLength_8b;
+	USART_Init(USARTx, &USARTcfg);
+
+	//Enable UART2 byte reception interrupt
+	USART_ITConfig(USART2,USART_IT_RXNE,ENABLE);
+	//Set the priority in NVIC
+	NVIC_SetPriority(USART2_IRQn,configMAX_SYSCALL_INTERRUPT_PRIORITY);
+	//Enable the UART2 IRQ in the NVIC
+	NVIC_EnableIRQ(USART2_IRQn);
+	//Enable the USART2 peripheral
+	USART_Cmd(USART2,ENABLE);
+
+	//Pin configuration: PA2 ==>TX; PA3 ==>RX
+	GPIO_TypeDef* GPIOx=GPIOA;
+	GPIO_InitTypeDef GPIOcfg;
+	GPIOcfg.GPIO_Pin=GPIO_Pin_2;
+	GPIOcfg.GPIO_Mode=GPIO_Mode_AF;
+	GPIOcfg.GPIO_OType=GPIO_OType_PP;
+	GPIOcfg.GPIO_PuPd=GPIO_PuPd_UP;
+	GPIOcfg.GPIO_Speed=GPIO_Low_Speed;
+	GPIO_Init(GPIOx,&GPIOcfg);
+	GPIOcfg.GPIO_Pin=GPIO_Pin_3;
+	GPIO_Init(GPIOx,&GPIOcfg);
+	GPIO_PinAFConfig(GPIOx,GPIO_PinSource2,GPIO_AF_USART2);
+	GPIO_PinAFConfig(GPIOx,GPIO_PinSource3,GPIO_AF_USART2);
+}
+
+static void sendMsg(char* msg)
+{
+	for(uint32_t i=0;i<strlen(msg);i++)
+	{
+		while ( USART_GetFlagStatus(USART2,USART_FLAG_TXE) != SET);
+		USART_SendData(USART2,(uint16_t)(*(msg+i)));
+	}
+}
+
+static void toggle_LED(TimerHandle_t xTimer)
+{
+	GPIO_ToggleBits(GPIOD,GPIO_Pin_12);
+}
+
+static void GPIO_LED_init()
+{
+	//Enable the GPIOD peripheral
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	//GPIOD12 Init
+	GPIO_TypeDef* GPIOx=GPIOD;
+	GPIO_InitTypeDef GPIO_cfg;
+	GPIO_cfg.GPIO_Pin=GPIO_Pin_12;
+	GPIO_cfg.GPIO_Mode=GPIO_Mode_OUT;
+	GPIO_cfg.GPIO_OType=GPIO_OType_PP;
+	GPIO_cfg.GPIO_PuPd=GPIO_PuPd_NOPULL;
+	GPIO_cfg.GPIO_Speed=GPIO_Low_Speed;
+	GPIO_Init(GPIOx,&GPIO_cfg);
+}
+
+void USART2_IRQHandler()
+{
+	BaseType_t higherPriorityTaskWoken=pdFALSE;
+	uint16_t data;
+	if(USART_GetFlagStatus(USART2,USART_FLAG_RXNE))
+	{
+		//Read the data received
+		data=USART_ReceiveData(USART2);
+		//Store 8 bits of data in a command buffer
+		commandBuffer[commandIndex++]=data & 0xFF;
+		if(data == '\r')
+		{
+			commandIndex=0;
+			//Command input finished ==> Notify the command handling task and menu display task
+			xTaskNotifyFromISR(cmd_handling_handle,0,eNoAction,&higherPriorityTaskWoken);
+			xTaskNotifyFromISR(menu_print_handle,0,eNoAction,&higherPriorityTaskWoken);
+		}
+	}
+	/*If the ISR has woken up a task with higher priority than the currently running task
+	yield the processor to the woken task*/
+	if(higherPriorityTaskWoken)
+	{
+		taskYIELD();
+	}
+}
+
+static uint8_t get_command(uint8_t* buffer)
+{
+	//Convert the data from ASCII value to the number
+	return buffer[0]-48;
+}
+
+void vApplicationIdleHook()
+{
+	//Send the microcontroller into low power mode
+	__WFI();
+}
+
+
+
+

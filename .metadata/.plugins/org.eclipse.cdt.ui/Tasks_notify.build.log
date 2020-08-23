@@ -1,0 +1,6 @@
+21:05:58 **** Incremental Build of configuration Debug for project Tasks_notify ****
+make -j4 all 
+make: Nothing to be done for 'all'.
+
+21:06:01 Build Finished (took 3s.111ms)
+

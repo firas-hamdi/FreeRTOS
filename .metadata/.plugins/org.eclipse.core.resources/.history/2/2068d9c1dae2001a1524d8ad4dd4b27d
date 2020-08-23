@@ -1,0 +1,63 @@
+/**
+  ******************************************************************************
+  * @file    main.c
+  * @author  Ac6
+  * @version V1.0
+  * @date    01-December-2013
+  * @brief   Default main function.
+  ******************************************************************************
+*/
+
+
+#include "stm32f4xx.h"
+#include "freeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "timers.h"
+#include <stdint.h>
+
+TaskHandle_t	menu_print_handle=NULL;
+TaskHandle_t	cmd_handling_handle=NULL;
+TaskHandle_t	cmd_processing_handle=NULL;
+TaskHandle_t	uart_write_handle=NULL;
+
+void menu_print_handler(void* params);
+void cmd_handling_handler(void* params);
+void cmd_processing_handler(void* params);
+void uart_write_handler(void* params);
+
+int main(void)
+{
+	//Tasks creation
+	xTaskCreate(menu_print_handler,"menu print task",500,NULL,0,&menu_print_handle);
+	xTaskCreate(cmd_handling_handler,"menu print task",500,NULL,0,&cmd_handling_handle);
+	xTaskCreate(cmd_processing_handler,"menu print task",500,NULL,0,&cmd_processing_handle);
+	xTaskCreate(uart_write_handler,"menu print task",500,NULL,0,&uart_write_handle);
+
+	//Start scheduler
+	vTaskStartScheduler();
+	for(;;);
+}
+
+
+void menu_print_handler(void* params)
+{
+	while(1);
+}
+
+void cmd_handling_handler(void* params)
+{
+	while(1);
+}
+
+void cmd_processing_handler(void* params)
+{
+	while(1);
+}
+
+void uart_write_handler(void* params)
+{
+	while(1);
+}
+
+

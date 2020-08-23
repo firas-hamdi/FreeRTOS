@@ -1,0 +1,28 @@
+23:45:08 **** Incremental Build of configuration Debug for project Button_IT ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\hp\Desktop\RTOS\RTOS_workspace\Button_IT\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F407VGTx -DSTM32F407G_DISC1 -DDEBUG -DSTM32F40XX -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/StdPeriph_Driver/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/3rd_party/FreeRTOS/org/Source/include" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/3rd_party/FreeRTOS/org/Source/portable/GCC/ARM_CM4F" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/3rd_party/SEGGER/Config" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/3rd_party/SEGGER/OS" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/3rd_party/SEGGER/SEGGER" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/inc" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/CMSIS/device" -I"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+In file included from ../src/main.c:13:0:
+C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/CMSIS/device/stm32f4xx.h:108:0: warning: "STM32F40_41xxx" redefined
+   #define STM32F40_41xxx
+ 
+<command-line>:0:0: note: this is the location of the previous definition
+Finished building: ../src/main.c
+ 
+Building target: Button_IT.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"C:/Users/hp/Desktop/RTOS/RTOS_workspace/Button_IT/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Button_IT.elf" @"objects.list"   -lm
+Finished building target: Button_IT.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "Button_IT.elf" "Button_IT.bin"
+arm-none-eabi-size "Button_IT.elf"
+   text	   data	    bss	    dec	    hex	filename
+  14512	   1104	  88052	 103668	  194f4	Button_IT.elf
+ 
+
+23:45:23 Build Finished (took 15s.433ms)
+
