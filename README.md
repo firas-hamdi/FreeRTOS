@@ -16,3 +16,7 @@
 		Tasks synchronization (using notification, queues, semaphores)
   
 		Mutual exclusion (using mutex)
+
+**Microcontroller:** STM32F4.
+
+**Processor:** ARM cortex-M
